@@ -1,0 +1,623 @@
+/*
+ * MpileupParser.cpp
+ *
+ *  Created on: Feb 20, 2015
+ *  Author: javier.navarro@caos.uab.es
+ *  Copyright (c) 2015 Javier Navarro, GNU license.
+ *
+ *  Original work from:
+ *  GHcaller
+ *  Copyright (c) 2013 Bruno Nevado, GNU license.
+ *
+ *  This file is part of PGHcaller.
+ *
+ *  PGHcaller is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  PGHcaller is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with PGHcaller.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+
+#include "MpileupParser.h"
+
+namespace ngh {
+
+MpileupParser::~MpileupParser() {
+    // TODO Auto-generated destructor stub
+}
+
+MpileupParser::MpileupParser(unsigned long num, FilterOptions* filters) {
+    logger = ngh::Logger::getInstance();
+    number_of_individuals = num;
+    this->filters = filters;
+}
+
+
+void MpileupParser::parse_buffer
+(std::string* buffer, ngh::Chunk data, std::vector <ngh::Site> *sites) {
+    std::locale loc;
+    const char tab[] = "\t";
+    char *token, *save_ptr;
+    std::string line;
+
+    std::stringstream str(buffer->substr(data.start, data.end - data.start));
+    while ( std::getline(str, line) ) {
+        ngh::Site site;
+        site.reads.reserve(number_of_individuals);
+
+        //   chr1 2 C 0 * * 0 * * 0 * * 1 ^]. = 0 * *
+        // strok is not thread safe
+        token = strtok_r(&line[0], tab, &save_ptr);      // token <- chr1
+        token = strtok_r (NULL, tab, &save_ptr);
+        // site.site = ( atoi(token));
+        token =  strtok_r (NULL, tab, &save_ptr);
+        site.ref  = ( tolower(*token, loc));
+
+        // Repeat this process for all individual's column
+        for (unsigned int ind = 0; ind < number_of_individuals; ind++) {
+            std::string reads;
+            std::string quals;
+
+            // Get token and size
+            // Depth from file
+            token =  strtok_r (NULL, tab, &save_ptr);
+            unsigned int raw_depth = atoi(token);
+            // Final depth after filters
+            unsigned int depth = 0;
+
+            // Create temporary string to store all valid reads
+            std::string ind_reads;
+            // Reserve enough memory to prevent resize
+            ind_reads.reserve(line.size());
+
+
+            // Parse if number of reads > 0
+            if( raw_depth > 0 )
+            {
+                // Get current reads/quals from file. Next element
+                reads =  strtok_r (NULL, tab, &save_ptr);
+                quals =  strtok_r (NULL, tab, &save_ptr);
+
+                unsigned int idx = 0;   // Index to read string
+                for (unsigned int j=0; j<reads.size(); j++)
+                {
+                    // Read starts
+                    switch( reads.at(j) )
+                    {
+                    case '.':
+                        if( quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms)
+                        {
+                            depth++;
+                            ind_reads.push_back( toupper(site.ref) );
+                            PILEUP(" += upper " << site.ref);
+                        }
+                        idx++;
+                        break;
+
+                    case ',':
+                        if( quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms)
+                        {
+                            depth++;
+                            ind_reads.push_back( tolower(site.ref) );
+                            PILEUP(" += lower " << site.ref);
+                        }
+                        idx++;
+                        break;
+
+                    case 'A': case 'a':
+                    case 'C': case 'c':
+                    case 'G': case 'g':
+                    case 'T': case 't':
+                    case 'N': case 'n':
+                        if( quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms)
+                        {
+                            depth++;
+                            ind_reads.push_back( reads.at(j) );
+                            PILEUP(" +=  " << reads.at(j));
+                        }
+                        // Move index to next
+                        idx++;
+                        break;
+
+
+                    case '+':
+                    case '-':
+                        // get number of insetions/deletions
+                        unsigned int t, bases;
+                        t=0; j++;
+                        while(isdigit(reads.at(j+t),loc) && j+t<reads.size())
+                        {
+                            t++;
+                        }
+                        bases = atoi(reads.substr(j, t).c_str());
+                        PILEUP( "bases to skip " << bases << " +/- size "  << t << " at position " << j << "," << t << " reads  " << reads);
+                        // Bypass all the characters
+                        j=j+bases+t-1;
+                        break;
+
+                    case '^':
+                        // Means beginning of read, next symbol is mapping quality in ascii
+                        // remove both
+                        j++;
+                        break;
+
+
+                    case '*':
+                         //  Skip '*'
+                        PILEUP( "skip *  read " << reads << " quals " << quals );
+                        idx++;
+                        break;
+                    }
+                }
+            }
+            // 0 * * - If the beginning of reads equals zero, bypass (* *) items
+            else
+            {
+                //it=it+2;
+                 strtok_r (NULL, tab, &save_ptr);
+                 strtok_r (NULL, tab, &save_ptr);
+            }
+            // Check depth
+            if(depth < filters[ind].mindeps || depth > filters[ind].maxdeps )
+            {
+                site.reads.push_back("N");
+                PILEUP("!!!! ind_reads N");
+            }
+            else
+            {
+                site.reads.push_back(ind_reads);
+                PILEUP("!!!! ind_reads " << ind_reads );
+            }
+
+        }
+        sites->push_back(site);
+    }
+}
+
+
+void MpileupParser::parse_buffer_strok
+(std::string* buffer, std::vector <ngh::Site> *sites) {
+    std::locale loc;
+    /*
+     * Parse all fields
+     */
+
+    /*
+     *  TODO Format must include these 6 characters. We can check if the format readed is OK
+     *      CHR + \t + SITE + \t + REF + \t
+     *  We should check if we need this information
+     */
+    const char tab[] = "\t";
+    const char newline[] = "\n";
+    char *token, *subtoken;
+    char *save_ptr_line, *save_ptr_column;
+    char *str1, *str2;
+    char ref;
+    // Set site atributes
+    // TODO: Work here!
+    //ngh::Site *site;
+    //site = new ngh::Site(number_of_individuals);
+
+    ngh::Site site;
+    //site.reads.reserve(number_of_individuals);
+    //ngh::Site site(number_of_individuals);
+    //site->reads.reserve(number_of_individuals);
+
+    /*
+     *   INFO       IND1    IND2    IND3    IND4      IND5
+     *   chr1 2 C   0 * *   0 * *   0 * *   1 ^]. =   0 * *  \n
+     *   chr1 3 C   0 * *   0 * *   0 * *   1 ^]. =   0 * *  \n
+     *   strok is not thread safe
+     */
+    for (str1 = const_cast<char*>(buffer->c_str()); ; str1 = NULL) {
+        token = strtok_r(str1, newline, &save_ptr_line);
+        if (token == NULL)
+            break;
+        // LOG_("TOKE " << token);
+
+        for (str2 = token; ; str2 = NULL) {
+            subtoken = strtok_r(str2, tab, &save_ptr_column);  // token <- chr1
+            if (subtoken == NULL)
+                break;
+            // LOG_("SUBTOKEN " << subtoken);
+
+            subtoken = strtok_r(NULL, tab, &save_ptr_column);     // site
+            // LOG_("-- " << subtoken);
+            // site.site = ( atoi(token));
+            subtoken =  strtok_r(NULL, tab, &save_ptr_column);    // Ref
+            // LOG_("--- " << subtoken);
+            // site.ref  = (tolower(*subtoken, loc));
+            ref = base_tolowercase(*subtoken);
+            // ref  = (tolower(*subtoken, loc));
+
+            // Repeat this process for all individual's column
+            for (uint32_t ind = 0; ind < number_of_individuals; ind++) {
+                std::string reads;
+                std::string quals;
+
+                // Get token and size
+                // Depth from file
+                subtoken =  strtok_r(NULL, tab, &save_ptr_column);
+                // LOG_("Depth " << subtoken);
+                unsigned int raw_depth = atoi(token);
+                // Final depth after filters
+                unsigned int depth = 0;
+
+                // Create temporary string to store all valid reads
+                std::string ind_reads;
+                // Reserve enough memory to prevent resize
+                // ind_reads.reserve(line.size());
+
+
+                // Parse if number of reads > 0
+                if (raw_depth > 0) {
+                    // Get current reads/quals from file. Next element
+                    reads =  strtok_r(NULL, tab, &save_ptr_column);
+                    quals =  strtok_r(NULL, tab, &save_ptr_column);
+
+                    unsigned int idx = 0;   // Index to read string
+                     for (unsigned int j=0; j<reads.size(); j++)
+                     {
+                         // Read starts
+                         switch( reads.at(j) )
+                         {
+                         case '.':
+                             if( quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms)
+                             {
+                                 depth++;
+                                 ind_reads.push_back( toupper(site.ref) );
+                                 PILEUP(" += upper " << site.ref);
+                             }
+                             idx++;
+                             break;
+
+                         case ',':
+                             if( quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms)
+                             {
+                                 depth++;
+                                 ind_reads.push_back( tolower(site.ref) );
+                                 PILEUP(" += lower " << site.ref);
+                             }
+                             idx++;
+                             break;
+
+                         case 'A': case 'a':
+                         case 'C': case 'c':
+                         case 'G': case 'g':
+                         case 'T': case 't':
+                         case 'N': case 'n':
+                             if( quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms)
+                             {
+                                 depth++;
+                                 ind_reads.push_back( reads.at(j) );
+                                 PILEUP(" +=  " << reads.at(j));
+                             }
+                             // Move index to next
+                             idx++;
+                             break;
+
+
+                         case '+':
+                         case '-':
+                             // get number of insetions/deletions
+                             unsigned int t, bases;
+                             t=0; j++;
+                             while(isdigit(reads.at(j+t),loc) && j+t<reads.size())
+                             {
+                                 t++;
+                             }
+                             bases = atoi(reads.substr(j, t).c_str());
+                             PILEUP( "bases to skip " << bases << " +/- size "  << t << " at position " << j << "," << t << " reads  " << reads);
+                             // Bypass all the characters
+                             j=j+bases+t-1;
+                             break;
+
+                         case '^':
+                             // Means beginning of read, next symbol is mapping quality in ascii
+                             // remove both
+                             j++;
+                             break;
+
+
+                         case '*':
+                              //  Skip '*'
+                             PILEUP( "skip *  read " << reads << " quals " << quals );
+                             idx++;
+                             break;
+                         }
+                     }
+                // 0 * * - If the beginning of reads equals zero, bypass (* *) items
+                } else {
+                    // it=it+2;
+                    strtok_r(NULL, tab, &save_ptr_column);
+                    strtok_r(NULL, tab, &save_ptr_column);
+                }
+                // Check depth
+                if (depth < filters[ind].mindeps || depth > filters[ind].maxdeps ) {
+                    site.reads.push_back("N");
+                } else {
+                    site.reads.push_back(ind_reads);
+                }
+            }
+            sites->push_back(site);
+        }
+    }
+}
+
+void MpileupParser::parse_line_to_reads(std::string& line, std::vector <std::string>* site_reads) {
+    std::locale loc;
+    const char tab[] = "\t";
+    char *token, *save_ptr;
+    char ref;
+
+    //   chr1 2 C 0 * * 0 * * 0 * * 1 ^]. = 0 * *
+    // strok is not thread safe
+    token = strtok_r(&line[0], tab, &save_ptr);      // token <- chr1
+    token = strtok_r(NULL, tab, &save_ptr);
+    token = strtok_r(NULL, tab, &save_ptr);
+    ref = tolower(*token, loc);
+
+    std::string reads;
+    std::string quals;
+
+    // Repeat this process for all individual's column
+    for (unsigned int ind = 0; ind < number_of_individuals; ind++) {
+        // Depth get from token
+        token = strtok_r(NULL, tab, &save_ptr);
+        unsigned int raw_depth = atoi(token);
+
+        // Final depth after filters
+        unsigned int depth = 0;
+
+        // Parse if number of reads > 0
+        if (raw_depth > 0) {
+            // Reserve enough memory to prevent resize
+            site_reads->at(ind).reserve(raw_depth);
+
+            // Get current reads/quals from file. Next element
+            reads = strtok_r(NULL, tab, &save_ptr);
+            quals = strtok_r(NULL, tab, &save_ptr);
+            unsigned int idx = 0;   // Index to read string
+            for (unsigned int j=0; j<reads.size(); j++) {
+                // Read starts
+                switch (reads.at(j)) {
+                case '.':
+                    if (quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms) {
+                        depth++;
+                        site_reads->at(ind).push_back(toupper(ref));
+                    }
+                    idx++;
+                    break;
+
+                case ',':
+                    if (quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms) {
+                        depth++;
+                        site_reads->at(ind).push_back( tolower(ref) );
+                    }
+                    idx++;
+                    break;
+
+                case 'A': case 'a':
+                case 'C': case 'c':
+                case 'G': case 'g':
+                case 'T': case 't':
+                case 'N': case 'n':
+                    if (quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms) {
+                        depth++;
+                        site_reads->at(ind).push_back(reads.at(j));
+                        PILEUP(" +=  " << reads.at(j));
+                    }
+                    // Move index to next
+                    idx++;
+                    break;
+
+
+                case '+':
+                case '-':
+                    // get number of insetions/deletions
+                    unsigned int t, bases;
+                    t=0; j++;
+                    while (isdigit(reads.at(j+t),loc) && j+t<reads.size()) {
+                        t++;
+                    }
+                    bases = atoi(reads.substr(j, t).c_str());
+                    // Bypass all the characters
+                    j=j+bases+t-1;
+                    break;
+
+                case '^':
+                    // Means beginning of read, next symbol is mapping quality in ascii
+                    // remove both
+                    j++;
+                    break;
+
+                case '*':
+                    //  Skip '*'
+                    idx++;
+                    break;
+                }
+            }
+        } else {
+            // 0 * * - If the beginning of reads equals zero, bypass (* *) items
+            //it=it+2;
+            strtok_r(NULL, tab, &save_ptr);
+            strtok_r(NULL, tab, &save_ptr);
+        }
+
+        // Check depth
+        if (depth < filters[ind].mindeps || depth > filters[ind].maxdeps) {
+            site_reads->at(ind).assign("N");
+        }
+        //   else {
+            // *(site_reads->at(ind)).push_back(ind_reads);
+        //}
+    }
+}
+
+// TODO CRITICAL CODE HERE! Use profile/likwid to check performance
+void MpileupParser::parse(std::string& line, std::vector <ngh::Site> *sites) {
+	std::locale loc;
+	/*
+	 * Parse all fields
+	 */
+
+	/*
+	 *  TODO Format must include these 6 characters. We can check if the format readed is OK
+	 *		CHR + \t + SITE + \t + REF + \t
+	 *	We should check if we need this information
+	 */
+	const char tab[] = "\t";
+	char *token, *save_ptr;
+
+	// Set site atributes
+	// TODO: Work here!
+	//ngh::Site *site;
+	//site = new ngh::Site(number_of_individuals);
+
+
+	ngh::Site site;
+	site.reads.reserve(number_of_individuals);
+	//ngh::Site site(number_of_individuals);
+	//site->reads.reserve(number_of_individuals);
+
+	//	 chr1 2 C 0 * * 0 * * 0 * * 1 ^]. = 0 * *
+	// strok is not thread safe
+	token = strtok_r(&line[0], tab, &save_ptr);      // token <- chr1
+	token = strtok_r (NULL, tab, &save_ptr);
+	site.site = ( atoi(token));
+	token =  strtok_r (NULL, tab, &save_ptr);
+	site.ref  = ( tolower(*token, loc));
+
+	// Repeat this process for all individual's column
+	for (unsigned int ind = 0; ind < number_of_individuals; ind++)
+	{
+		std::string reads;
+		std::string quals;
+
+		// Get token and size
+		// Depth from file
+		token =  strtok_r (NULL, tab, &save_ptr);
+		unsigned int raw_depth = atoi(token);
+		// Final depth after filters
+		unsigned int depth = 0;
+
+		// Create temporary string to store all valid reads
+		std::string ind_reads;
+		// Reserve enough memory to prevent resize
+		ind_reads.reserve(line.size());
+
+
+		// Parse if number of reads > 0
+		if( raw_depth > 0 )
+		{
+			// Get current reads/quals from file. Next element
+			reads =  strtok_r (NULL, tab, &save_ptr);
+			quals =  strtok_r (NULL, tab, &save_ptr);
+
+			unsigned int idx = 0;	// Index to read string
+			for (unsigned int j=0; j<reads.size(); j++)
+			{
+				// Read starts
+				switch( reads.at(j) )
+				{
+				case '.':
+					if( quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms)
+					{
+						depth++;
+						ind_reads.push_back( toupper(site.ref) );
+						PILEUP(" += upper " << site.ref);
+					}
+					idx++;
+					break;
+
+				case ',':
+					if( quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms)
+					{
+						depth++;
+						ind_reads.push_back( tolower(site.ref) );
+						PILEUP(" += lower " << site.ref);
+					}
+					idx++;
+					break;
+
+				case 'A': case 'a':
+				case 'C': case 'c':
+				case 'G': case 'g':
+				case 'T': case 't':
+				case 'N': case 'n':
+					if( quals.at(idx) >= filters[ind].baseqs + filters[ind].platforms)
+					{
+						depth++;
+						ind_reads.push_back( reads.at(j) );
+						PILEUP(" +=  " << reads.at(j));
+					}
+					// Move index to next
+					idx++;
+					break;
+
+
+				case '+':
+				case '-':
+					// get number of insetions/deletions
+					unsigned int t, bases;
+					t=0; j++;
+					while(isdigit(reads.at(j+t),loc) && j+t<reads.size())
+					{
+						t++;
+					}
+					bases = atoi(reads.substr(j, t).c_str());
+					PILEUP( "bases to skip " << bases << " +/- size "  << t << " at position " << j << "," << t << " reads  " << reads);
+					// Bypass all the characters
+					j=j+bases+t-1;
+					break;
+
+				case '^':
+					// Means beginning of read, next symbol is mapping quality in ascii
+					// remove both
+					j++;
+					break;
+
+
+				case '*':
+					 //  Skip '*'
+					PILEUP( "skip *  read " << reads << " quals " << quals );
+					idx++;
+					break;
+				}
+			}
+		}
+		// 0 * * - If the beginning of reads equals zero, bypass (* *) items
+		else
+		{
+			//it=it+2;
+			 strtok_r (NULL, tab, &save_ptr);
+			 strtok_r (NULL, tab, &save_ptr);
+		}
+		// Check depth
+		if(depth < filters[ind].mindeps || depth > filters[ind].maxdeps )
+		{
+			site.reads.push_back("N");
+			PILEUP("!!!! ind_reads N");
+		}
+		else
+		{
+			site.reads.push_back(ind_reads);
+			PILEUP("!!!! ind_reads " << ind_reads );
+		}
+
+	}
+	sites->push_back(site);
+}
+
+
+
+} /* namespace ngh */

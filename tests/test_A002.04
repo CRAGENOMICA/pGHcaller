@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "Running test A002.04 - "
+echo "- original arguments \"\""
+echo "- new arguments \"\""
+scripts/test_runner "./data/test.5inds.8X.mpileup||"
+exit $?

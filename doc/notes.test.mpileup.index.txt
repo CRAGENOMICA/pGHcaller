@@ -1,0 +1,42 @@
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):332] - Position 26-200064
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):332] - Position 200064-200064
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):332] - Position 400102-200064
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):332] - Position 600140-200064
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):332] - Position 800178-200064
+
+0 seq + offset 	26				1 seq + offset 26 + (26+99993)=100045
+2 seq + offset 	26 + 2*(26+99993)=200064	3 seq + offset 26 + 3*(26+99993)=300083
+4 seq + offset 
+
+
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):356] - Position 27-100046
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):356] - Position 200065-300084
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):356] - Position 400103-500122
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):356] - Position 600141-700160
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):356] - Position 800179-900198
+[LOG] - <GHcaller> All tasks processed.
+[TIME2_MSG] - #_1_Wait_next_task #2  0
+[DEBUG_MSG : int main(int, char**):357] - Created site vector with size 8283
+[DEBUG_MSG : int main(int, char**):365] - Created SNP vector with size 8283
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):356] - Position 27-100046
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):356] - Position 200065-300084
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):356] - Position 400103-500122
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):356] - Position 600141-700160
+[BUILD_NGH_DEBUG_MSG : void ngh::MFastaFile::build_haplotype(const std::vector<ngh::SNPcall>&):356] - Position 800179-900198
+[LOG] - <GHcaller> All ending messages sent
+
+
+Site reference 2 Position 28-100047
+Site reference 3 Position 200067-300086
+Site reference 4 Position 400106-500125
+Site reference 5 Position 600145-700164
+Site reference 6 Position 800184-900203
+
+Sie reference 91710 Position 91736-191755
+Site reference 91711 Position 291775-391794
+Site reference 91712 Position 491814-591833
+Site reference 91713 Position 691853-791872
+Site reference 91714 Position 891892-991911
+
+NNNNNNNNNTNNANTNANAGAGGGNNGNCNNGNTGNTGCCACAAGCAGCTAATTGACAAACANGNGGCGGCCGANAANAG
+NNNNNNNNNNTNNANTNANAGAGGGNNGNCNNGNTGNTGCCACAAGCAGCTAATTGACAAACANGNGGCGGCCGANAANA

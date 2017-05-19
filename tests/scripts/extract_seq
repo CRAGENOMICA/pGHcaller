@@ -1,0 +1,17 @@
+#!/bin/bash
+
+[ -z $1 ] && echo "ERR: No files provided" && exit 1
+[ -z $2 ] && echo "ERR: You must provide a file to compare with" && exit 1
+[ -z $3 ] && echo "ERR: You must provide a sequence number to extract" && exit 1
+
+ERASE=0
+DATA1=$1
+DATA2=$2
+SEQ=$3; SEQ=$((SEQ * 2))
+
+echo "Extracting sequence $((SEQ/2)): "
+head -n $SEQ $DATA1 | tail -n 1 > seq1_$((SEQ/2))
+head -n $SEQ $DATA2 | tail -n 1 > seq2_$((SEQ/2))
+[ $ERASE -eq 1 ] && rm -f  seq1_$((SEQ/2)) seq2_$((SEQ/2))
+
+

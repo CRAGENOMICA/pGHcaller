@@ -1,0 +1,40 @@
+
+* STL
+
+
+* MPI
+
+
+
+* OPENMP
+https://www.dartmouth.edu/~rc/classes/intro_openmp/openmp_functions.html
+        	/*
+            std::vector<int> v(1000);
+            # pragma omp parallel for
+            for (int i = 0; i < 1000; ++i) {
+                v[i] = i;
+            }
+            #pragma omp parallel for
+			for (int i=0; i<4; i++)
+			{
+			for (int index=0;index<vec.size();index++)
+			{
+			//do ntothing
+			}
+			}
+
+			std::vector<int> vec;
+			// We could calculate the correct number of threads here.
+			#pragma omp parallel
+			{
+    		std::vector<int> vec_private;
+    		#pragma omp for nowait //fill vec_private in parallel
+    		for(int i=0; i<100; i++) {
+        		vec_private.push_back(i);
+    		}
+    		#pragma omp critical
+    		vec.insert(vec.end(), vec_private.begin(), vec_private.end());
+			}
+        	 */
+
+

@@ -1,0 +1,5 @@
+* Add openmp detection in confiugre.ac
+* Check Sites, SNPcall classes
+* Optimize process funtion
+* To implement Algorithm class
+* Check OpenMP code to adapt app to resources. Create a wrapper to launch our app

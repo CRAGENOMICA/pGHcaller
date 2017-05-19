@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "Running test A001.05 - With chivalue 2.0"
+echo "- original arguments \"-chivalue 2.0\""
+echo "- new arguments \"--chivalue=2.0\""
+scripts/test_runner "./data/head100.mpileup|-chivalue 2.0|--chivalue=2.0"
+exit $?

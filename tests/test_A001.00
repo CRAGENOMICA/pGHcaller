@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "Running test A001.00 - Running with default options"
+echo "- original arguments \"\""
+echo "- new arguments \"\""
+scripts/test_runner "./data/head100.mpileup||"
+exit $?

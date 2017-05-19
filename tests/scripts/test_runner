@@ -1,0 +1,62 @@
+#!/bin/bash  
+
+# Tests communicate with the harness by return code (the small integer passed to the caller 
+# by the "exit" command in the shell script). The harness recognizes at least these values:
+# 
+# 0 - Test succeeded.
+# 77 - Test was skipped; it was impossible or inappropriate to run this test, 
+# for instance because it requires external software that wasn't installed, 
+# or it tests an optional feature that was disabled by configuration option. 
+# Such tests appear with a cyan "SKIP" notation in the results; they are 
+# counted separately from successes, but they don't cause the overall result 
+# to be "FAIL" as a regular failure would.
+# 99 - Test failed in an epic way! The driver provides a feature for specifying 
+# some tests on which a "failure" result is considered good (and a "success" 
+# result bad); the return code 99 is supposed to be for tests so designated 
+# that were epic failures, so they should actually count as failures even 
+# though you said that you wanted to count failures as successes. I don't 
+# think this feature is a good idea and won't discuss it further in this article.
+# any other non-zero values - it appears that all other nonzero values are 
+# counted as the ordinary kind of test failure. I've been using 1 for this 
+# purpose and it seems to work.
+
+INPUT_1=`echo "$1" | awk -F  "|" '{print $1}'`
+ARG_1=`echo "$1" | awk -F  "|" '{print $2}'`
+ARG_2=`echo "$1" | awk -F  "|" '{print $3}'`
+
+SCRIPTS="scripts"
+
+function check_exit() {
+	EXIT=$1 
+	if [ $EXIT != 0 ] ; then
+		rm -f  test-out1.$$ test-out2.$$ pghcaller.clog2 gmon.out
+		exit $EXIT
+	fi
+}
+
+# Check scripts exist
+[ ! -x $SCRIPTS/run_ghcaller ] &&  exit 77
+[ ! -x $SCRIPTS/run_pghcaller ] &&  exit 77
+[ ! -x $SCRIPTS/test_sequences ] && exit 77
+
+# Check VARS
+
+# Run GH caller
+$SCRIPTS/run_ghcaller "$ARG_1 -outfile test-out1.$$" $INPUT_1 
+# &> /dev/null
+check_exit $?
+
+# Run GH caller parallel
+$SCRIPTS/run_pghcaller "$ARG_2 -o test-out2.$$" $INPUT_1 
+# &> /dev/null
+check_exit "$?"
+
+# Test output sequences
+$SCRIPTS/test_sequences test-out1.$$ test-out2.$$
+# We can use cmp or diff programs too 
+# cmp test-out1.$$ test-out2.$$
+check_exit $?
+
+# Exit 0 means test is OK
+rm -f pghcaller.clog2 gmon.out test-out1.$$ test-out2.$$
+exit 0

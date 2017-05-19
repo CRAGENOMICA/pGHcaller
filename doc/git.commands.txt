@@ -1,0 +1,61 @@
+mkdir test3
+cd test3
+git init
+touch README.md
+git add README.md
+git commit -m "first commit"
+git remote add origin https://gitlab.cragenomica.es/jnavarro/test.git
+git push -u origin master
+
+
+mkdir test4
+cd test4
+git init
+touch README.md
+git add README.md
+git commit -m "first commit"
+git remote add origin https://gitlab.crag.bio.local/jnavarro/test.git
+git push -u origin master
+
+
+git@gitlab.bio.crag.local:jnavarro/test.git
+git config --global user.name "Javier Navarro"
+git config --global user.email "javier.navarro@cragenomica.es"
+
+mkdir test1
+cd test1
+git init
+touch README.md
+git add README.md
+git commit -m "first commit"
+git remote add origin git@gitlab.bio.crag.local:jnavarro/test.git
+git push -u origin master
+
+
+git config --global user.name "Javier Navarro"
+git config --global user.email "javier.navarro@cragenomica.es"
+Create a new repository
+mkdir test2
+cd test2
+git init
+touch README.md
+git add README.md
+git commit -m "first commit"
+git remote add origin https://gitlab.bio.crag.local/jnavarro/test2.git
+git push -u origin master
+
+
+git config --global user.name "Javier Navarro"
+git config --global user.email "javier.navarro@cragenomica.es"
+Create a new repository
+mkdir test3
+cd test3
+git init
+touch README.md
+git add README.md
+git commit -m "first commit"
+git remote add origin https://gitlab.cragenomica.es/jnavarro/test3.git
+git push -u origin master
+
+
+

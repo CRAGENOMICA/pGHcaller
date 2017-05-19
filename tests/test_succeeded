@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# Tests communicate with the harness by return code (the small integer passed to the caller 
+# by the "exit" command in the shell script). The harness recognizes at least these values:
+# 
+# 0 - Test succeeded.
+# 77 - Test was skipped; it was impossible or inappropriate to run this test, 
+# for instance because it requires external software that wasn't installed, 
+# or it tests an optional feature that was disabled by configuration option. 
+# Such tests appear with a cyan "SKIP" notation in the results; they are 
+# counted separately from successes, but they don't cause the overall result 
+# to be "FAIL" as a regular failure would.
+# 99 - Test failed in an epic way! The driver provides a feature for specifying 
+# some tests on which a "failure" result is considered good (and a "success" 
+# result bad); the return code 99 is supposed to be for tests so designated 
+# that were epic failures, so they should actually count as failures even 
+# though you said that you wanted to count failures as successes. I don't 
+# think this feature is a good idea and won't discuss it further in this article.
+# any other non-zero values - it appears that all other nonzero values are 
+# counted as the ordinary kind of test failure. I've been using 1 for this 
+# purpose and it seems to work.
+
+if test '!' -r $0
+then
+  exit 77
+fi
+
+echo "PEPE" > dem-out1.$$
+echo === >> dem-out1.$$
+echo "PEPE" > dem-out2.$$
+echo === >> dem-out2.$$
+
+if diff dem-out1.$$ dem-out2.$$
+then
+  rm -f dem-out?.$$
+  exit 0
+else
+  rm -f dem-out?.$$
+  exit 1
+fi

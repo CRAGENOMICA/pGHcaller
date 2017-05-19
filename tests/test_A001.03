@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "Running test A001.03 - Use minreads: 10"
+echo "- original arguments \"-minreads 10\""
+echo "- new arguments \"--minreads=10\""
+scripts/test_runner "./data/head100.mpileup|-minreads 10|--minreads=10"
+exit $?

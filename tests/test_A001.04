@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "Running test A001.04 - Perform only genotype calls. Default is genotype and haplotype calls."
+echo "- original arguments \"-haplotypes 0\""
+echo "- new arguments \"--only_genotypes\""
+scripts/test_runner "./data/head100.mpileup|-haplotypes 0|--only_genotypes"
+exit $?

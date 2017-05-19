@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "Running test A002.05 - Use minreads:2, mindep: 4, and maxdep:16"
+echo "- original arguments \"-minreads 2 -mindep 4,4,4,4,4 -maxdep 16,16,16,16,16\""
+echo "- new arguments \"--minreads=2 --mindepth=4 --maxdepth=16\""
+scripts/test_runner "./data/test.5inds.8X.mpileup|-minreads 2 -mindep 4,4,4,4,4 -maxdep 16,16,16,16,16|--minreads=2 --mindepth=4 --maxdepth=16"
+exit $?

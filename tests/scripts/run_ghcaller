@@ -1,0 +1,14 @@
+#!/bin/bash -x
+
+ARGS="$1" 
+INPUT=$2
+OUTGROUP=$3
+
+[ ! -r $INPUT ] && exit 77
+[ ! -z $OUTGROUP ] && [ ! -r $OUTGROUP ] && exit 77
+
+# Run program 
+cat $INPUT | ghcaller/ghcaller $ARGS  
+
+exit $?
+

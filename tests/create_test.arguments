@@ -1,0 +1,23 @@
+# TEST ID | INPUT | CMD AND ARGUMENTS APP ORI |  CMD AND ARGUMENTS APP TO TEST | Comment
+# TAGS defined in config file:
+#    [DATADIR] - Directory where all input files were stored
+#    [TMPDIR]  - Directory used to create tmp files when running tests
+A001.00|[DATADIR]/head100.mpileup|||Running with default options
+A001.01|[DATADIR]/head100.mpileup||-v -s 1|Test different chunk sizes: 1MB
+A001.02|[DATADIR]/head100.mpileup||-v -s 100|Test different chunk sizes: 100MB
+A001.03|[DATADIR]/head100.mpileup|-minreads 10|--minreads=10|Use minreads: 10 
+A001.04|[DATADIR]/head100.mpileup|-haplotypes 0|--only_genotypes|Perform only genotype calls. Default is genotype and haplotype calls.
+A001.05|[DATADIR]/head100.mpileup|-chivalue 2.0 |--chivalue=2.0 |With chivalue 2.0 
+A001.06|[DATADIR]/head100.mpileup|-error 0.1|--error=0.1|With error: 0.1 
+A001.07|[DATADIR]/head100.mpileup|-minreads 2 -chivalue 2.0 -error 0.1|--minreads=2 --chivalue=2.0 --error=0.1|With chivalue 2.0, error: 0.1, and minreads 2 
+A002.00|[DATADIR]/test.5inds.8X.mpileup|||Running with default options
+A002.01|[DATADIR]/test.5inds.8X.mpileup||-v -s 1|Test different chunk sizes: 1MB
+A002.02|[DATADIR]/test.5inds.8X.mpileup||-v -s 100|Test different chunk sizes: 100MB
+A002.03|[DATADIR]/test.5inds.8X.mpileup|-names i1,i2,i3,i4,i5|--names=i1,i2,i3,i4,i5|Set names to output sequences
+A002.04|[DATADIR]/test.5inds.8X.mpileup|-minreads 10|--minreads=10|Use minreads: 10 
+A002.04|[DATADIR]/test.5inds.8X.mpileup|-haplotypes 0|--only_genotypes|Perform only genotype calls. Default is genotype and haplotype calls.
+A002.05|[DATADIR]/test.5inds.8X.mpileup|-minreads 2 -mindep 4,4,4,4,4 -maxdep 16,16,16,16,16|--minreads=2 --mindepth=4 --maxdepth=16|Use minreads:2, mindep: 4, and maxdep:16
+A002.06|[DATADIR]/test.5inds.8X.mpileup|-chivalue 2.0 |--chivalue=2.0 |With chivalue 2.0 
+A002.07|[DATADIR]/test.5inds.8X.mpileup|-error 0.1|--error=0.1|With error: 0.1 
+A002.08|[DATADIR]/test.5inds.8X.mpileup|-minreads 2 -chivalue 2.0 -error 0.1|--minreads=2 --chivalue=2.0 --error=0.1|With chivalue 2.0, error: 0.1, and minreads 2 
+# A002.09|[DATADIR]/test.5inds.8X.mpileup|-minreads 4 -mindep 5,5,5,5,5 -maxdep 15,15,15,15,15 -outgroup [DATADIR]/test.reference.fas|--minreads=4 --mindepth=5 --maxdepth=15 -a --outgroup=[DATADIR]/test.reference.fas|Use minreads:4, mindep: 4, maxdep:15, and reference 

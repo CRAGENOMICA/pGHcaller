@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# TTNAME=`basename -s .sh $0`
+TTNAME="create_test"
+
+function log() {
+	echo "[$TTNAME] - $*"
+}
+
+function err() {
+	echo "[$TTNAME] - ERR: $*"
+	echo "[$TTNAME] - Exiting!!"
+	exit 1 
+}
+
+trim() {
+    local var="$*"
+    var="${var#"${var%%[![:space:]]*}"}"   # remove leading whitespace characters
+    var="${var%"${var##*[![:space:]]}"}"   # remove trailing whitespace characters
+    echo -n "$var"
+}
+
+replace_tags() {
+    local var="$*"
+    # var=`echo $var | sed 's/\[OUTPUT\]/'"${TT_ID}.${TT_SUFIX}"'/g'`
+    var=`echo $var | sed 's:\[DATADIR\]:'"${DATADIR}"':g'`
+    var=`echo $var | sed 's:\[TMPDIR\]:'"${TMPDIR}"':g'`
+    echo -n "$var"
+}
+
+TTCONF_FILE="${TTNAME}.conf"
+
+
+# source config file
+[ ! -f $TTCONF_FILE ] && err "Cannot find $TTCONF_FILE configuration file."
+log "Load $TTCONF_FILE configuration file"
+source $TTCONF_FILE
+
+# Check test file 
+[ ! -f $TTTEST_FILE ] && err "Cannot find $TTTEST_FILE configuration file."
+
+
+# Save all test
+TESTS_LIST='test_succeeded'
+
+# Create all tests from arguments file
+while read line; do
+    # A line starting with # is a comment
+    if [[ ! $line == \#* ]]; then
+	# TTID=`echo "$line" | awk -F  "|" '/1/ {print $1}'`
+	TTID=`echo "$line" | awk -F  "|" '{print $1}'`
+	# INPUT=`echo "$line" | awk -F  "|" '/1/ {print $2}'`
+	INPUT=`echo "$line" | awk -F  "|" '{print $2}'`
+	TTARGS_ORI=`echo "$line" | awk -F  "|" '/1/ {print $3}'`
+	TTARGS_NEW=`echo "$line" | awk -F  "|" '/1/ {print $4}'`
+	COMMENTS=`echo "$line" | awk -F  "|" '/1/ {print $5}'`
+	# Replace special TAGS
+	INPUT=`replace_tags $INPUT`
+	TTARGS_ORI=`replace_tags $TTARGS_ORI`
+	TTARGS_NEW=`replace_tags $TTARGS_NEW`
+	# Create test_file with these parameters
+	log "Creating test $TTID - $COMMENTS "
+	log "   original arguments \"$TTARGS_ORI\""
+        log "   new arguments \"$TTARGS_NEW\""
+cat >test_$TTID  <<EOF
+#!/bin/sh
+echo "Running test $TTID - $COMMENTS"
+echo "- original arguments \"$TTARGS_ORI\""
+echo "- new arguments \"$TTARGS_NEW\""
+scripts/test_runner "$INPUT|$TTARGS_ORI|$TTARGS_NEW"
+exit \$?
+EOF
+chmod +x test_$TTID 
+	TESTS_LIST="$TESTS_LIST test_$TTID"
+    #else
+    #    log "$line starts with #" ;
+    fi
+done < $TTTEST_FILE
+
+
+# Replace TEST in Makefile.am
+log "New group of tests created: $TESTS_LIST"
+log "run 'make check' command to executed all"
+sed -i 's/TESTS.*/TESTS = '"$TESTS_LIST"'/g' Makefile.am
+
+exit 0

@@ -1,0 +1,38 @@
+## common.am
+
+DEFAULT_INCLUDES =
+
+# Macros
+ACLOCAL_AMFLAGS = -I m4
+AM_CXXFLAGS = -fpic -Wall -Wextra 
+AM_CXXFLAGS +=  $(log4cpp_CFLAGS) $(log4cpp_LIBS) $(openmp_CFLAGS) 
+
+# Enable debug
+debug_CFLAGS =
+if SETDEBUG
+debug_CFLAGS += -O0 -DDEBUG 
+else
+debug_CFLAGS += -O3 -DNDEBUG 
+endif
+# AM_CXXFLAGS +=  $(debug_CFLAGS)
+
+# Enable profile
+profile_CFLAGS = 
+if PROFILE
+profile_CFLAGS += -g -pg  
+endif
+# AM_CXXFLAGS +=  $(profile_CFLAGS) 
+
+# Enable MPE
+# TODO: Get LIB & INCLUDE DIR FROM AUTOTOOLS
+mpe_CFLAGS =
+if MPE
+# mpe_CFLAGS += -mpicc=mpic++ -pg -g -I/home/jnavarro/software/mpe2/include -L/home/jnavarro/software/mpe2/lib -llmpe -lmpe -mpilog
+# mpe_CFLAGS += -mpicc=mpic++ -pg -g -I/opt/mpe2-1.3.0_openmpi-1.8.8_gcc-4.9.1/include -L/opt/mpe2-1.3.0_openmpi-1.8.8_gcc-4.9.1/lib -llmpe -ltmpe -lmpe -mpilog
+mpe_CFLAGS += -mpicc=mpic++ -llmpe -ltmpe -lmpe -mpilog
+endif
+
+AM_CXXFLAGS +=  -std=c++11 $(debug_CFLAGS)  $(profile_CFLAGS) $(mpe_CFLAGS) 
+
+
+

@@ -1,0 +1,20 @@
+#!/bin/bash -x
+
+ARGS=$1 
+INPUT=$2
+OUTGROUP=$3
+
+[ ! -r $INPUT ] && exit 77
+[ ! -z $OUTGROUP ] && [ ! -r $OUTGROUP ] && exit 77
+
+# Check if we can locate mpirun
+MPIRUN=`which mpirun` 
+mpirun --allow-run-as-root -h 2>&1 > /dev/null
+[ $? != 0 ] && exit 99
+
+# Run program 
+# mpirun -np 2 -host localhost ../src/pghcaller $ARGS -i $INPUT -o $OUTPUT
+# $MPIRUN -np 2 -H localhost -mca btl_tcp_if_exclude lo  ../src/pghcaller -v -i $INPUT $ARGS
+$MPIRUN --allow-run-as-root -np 2 ../src/pghcaller -v -i $INPUT $ARGS
+
+exit $?

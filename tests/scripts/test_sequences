@@ -1,0 +1,34 @@
+#!/bin/bash -x 
+
+SCRIPTS="scripts"
+
+[ ! -x $SCRIPTS/extract_seq ] && exit 77
+[ ! -x diffseqs/diffseqs ] && exit 77
+[ -z $1 ] && echo "ERR: two files are required as arguments" && exit 99
+[ -z $2 ] && echo "ERR: two files are required as arguments" && exit 99
+
+FASTAOK=$1
+OUTPUT=$2
+
+# check number of lines
+NL1=`cat $OUTPUT | wc -l`
+NL2=`cat $FASTAOK | wc -l`
+[ $NL1 != $NL2 ] && echo "ERR: File 1 has $NL1 lines, but  File 2 has $NL2" && exit 1
+
+ISZERO=$((NL1%2))
+[ $ISZERO != 0  ] && echo "ERR: A file with a odd number of lines is required" && exit 1 
+
+EXIT=0
+for seq in `seq 1 2 $((NL1/2))`; do
+	echo "Working with sequence $seq: "
+	echo -n "*";
+	$SCRIPTS/extract_seq $OUTPUT $FASTAOK $seq
+	echo -n "*";
+	$SCRIPTS/extract_seq $OUTPUT $FASTAOK $((seq+1))
+	diffseqs/diffseqs seq1_$((seq+0)) seq1_$((seq+1)) seq2_$((seq+0)) seq2_$((seq+1)) 
+	EXIT=$?
+	rm -f seq1_$((seq+0)) seq1_$((seq+1)) seq2_$((seq+0)) seq2_$((seq+1))
+	[ $EXIT != 0 ] && exit $EXIT
+done
+
+exit $EXIT
