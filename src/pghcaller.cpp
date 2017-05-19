@@ -27,7 +27,7 @@
 #include "Logger.h"
 #include "CManager.h"
 #include "Data.h"
-#include "CAlgorithm.h"
+// #include "CAlgorithm.h"
 #include "CFileWriter.h"
 #include "CFileWriterMPIIO.h"
 
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
 	taskmanager.setOptions(&options);
 
 	// TODO(jnavarro) At this moment algorithm uses RoestiCaller Class
-	ngh::Algorithm::CAlgorithm algorithm(ngh::Algorithm::AlgorithmType::ROESTI, &options);
+	// ngh::Algorithm::CAlgorithm algorithm(ngh::Algorithm::AlgorithmType::ROESTI, &options);
 
 	// Create manager
 	ngh::CManager<ngh::Window> manager(&options);
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
 	manager.set_output_writer(file_writer);
 
 	// Set algorithm
-	manager.set_algorithm(&algorithm);
+	// manager.set_algorithm(&algorithm);
 
 	// Run Manager: master & Worker
 	manager.run();

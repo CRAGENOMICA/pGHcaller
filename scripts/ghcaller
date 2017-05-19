@@ -20,11 +20,10 @@ function help(){
 	echo "-------------------------"
 	echo "   Usage: ghcaller  [-p|--procs number_of_processes (MPI)] [-t|--threads number_of_threads (OMP)] [GHcaller main options]"
 	echo ""
-	
-        # Get help from main application
+	# Get help from main application
 	echo "GHcaller main options:" 
 	echo "----------------------" 
-	$MPIRUN --allow-run-as-root -np $PROC $PGHCALLER --help
+	$MPIRUN -np 2 $PGHCALLER --help
 }
 
 # TODO runners
@@ -32,7 +31,10 @@ function run(){
 	local args=$@
 	echo "[GHCALLER] Running ARGS $args"
 	export OMP_NUM_THREADS=$THREADS
-	$MPIRUN --allow-run-as-root -x OMP_NUM_THREADS  $PGHCALLER $args
+	#echo mpirun -x OMP_NUM_THREADS -np $PROC $PGHCALLER $args
+	#mpirun -x OMP_NUM_THREADS -np $PROC $PGHCALLER $args
+	# $MPIRUN --display-map -x OMP_NUM_THREADS  $PGHCALLER $args
+	$MPIRUN -x OMP_NUM_THREADS  $PGHCALLER $args
 }
 
 # Check enviroment
@@ -99,8 +101,7 @@ if [ -r /proc/cpuinfo ] ; then
 # elsif []
 # We cannot get info
 else
-   echo "[WARN] Cannot figure out number of processors. Using a default number of 4."
-   PROC=4
+   PROC=2
    THREADS=1
 fi
 
@@ -109,21 +110,24 @@ array=( $@ )              # get all args in an array
 len=${#array[@]}          # find the length of an array
 l=0
 
-# BASH BUILT-IN option
-set -- $(getopt -q hp:t: "$@")
-while [ $# -gt 0 ]
-do
+TEMP=`getopt -q -o hp:t: --long help,procs,threads: \
+     -n 'ghcaller.bash' -- "$@"` 
+#if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+# Note the quotes around `$TEMP': they are essential!
+eval set -- "$TEMP"
+while true ; do
     case "$1" in
 	-h|--help)    help ; exit 0 
 	;;
+        #-p|--procs)   echo "Processes  $2" ; l=$(( l+1 )); PROC=$2;   shift 2
         -p|--procs)   l=$(( l+1 )); PROC=$2;   shift 2
 	;;
+        #-t|--threads) echo "Thread $2" ; l=$(( l+1 )); THREADS=$2; shift 2 
         -t|--threads) l=$(( l+1 )); THREADS=$2; shift 2 
 	;;
         --) shift ; break 
 	;;
     esac
-    shift
 done
 
 # Check nodes and threads

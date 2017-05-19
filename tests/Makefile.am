@@ -4,7 +4,7 @@ SUBDIRS = ghcaller diffseqs
 
 SUFFIXES = .cpp
 
-TESTS = test_succeeded test_A001.00 test_A001.01 test_A001.02 test_A001.03 test_A001.04 test_A001.05 test_A001.06 test_A001.07 test_A002.00 test_A002.01 test_A002.02 test_A002.03 test_A002.04 test_A002.04 test_A002.05 test_A002.06 test_A002.07 test_A002.08
+TESTS = test_succeeded test_A001.00 test_A001.01 test_A001.02 test_A001.03 test_A001.04 test_A001.05 test_A001.06 test_A001.07 test_A002.00 test_A002.01 test_A002.02 test_A002.03 test_A002.04 test_A002.04 test_A002.05 test_A002.06 test_A002.07 test_A002.08 test_A002.09
 
 .PHONY: test-runner
 # test-runner:

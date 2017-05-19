@@ -351,8 +351,8 @@ void CmdArguments::help(){
 	std::cout << "Usage: "<< PACKAGE_NAME <<"  -i data.pileup  -o outfile.fasta [ filtering options ] [ SNP calling options ] [ Output options ]" << std::endl;
 	std::cout << "Genotype-Haplotype SNP calling from MPILEUP data."<< std::endl;
 	std::cout << "Naive Genotype/Haplotype SNP caller version " << PACKAGE_VERSION << std::endl;
-	std::cout << "Authors: J. Navarro & S. Ramos-Onsins"<< std::endl;
-	std::cout << "Contact: javier.navarro@uab.es"<< std::endl;
+	std::cout << "Authors: J. Navarro & X & Y & Z"<< std::endl;
+	std::cout << "Contact: javier.navarro@cragenomica.es"<< std::endl;
 	std::cout << std::endl;
 	std::cout << "Original version: bioinformatics.cragenomica.es/numgenomics"<< std::endl;
 	std::cout << "Authors of original version: B. Nevado & S. Ramos-Onsins"<< std::endl;
@@ -387,7 +387,8 @@ void CmdArguments::help(){
     std::cout << "  -o, --output    file  set to zero (0) to perform only genotype callsto write to        (required)" << std::endl;
  // -f option to read input file with all filter options
     std::cout << "  -N, --names     comma-separated list of individuals' names, in same order as input." << std::endl;
-    std::cout << "  -O, --outgroup  sequence file in fasta format to add to output alignment (def: none)." << std::endl;
+    std::cout << "  -O, --outgroup  " << std::endl;
+    std::cout << "  -R, --reference sequence file in fasta format to add to output alignment (def: none)." << std::endl;
     std::cout << "  -a, --append    append outgroup/reference sequence provided at the end of the output FASTA file" << std::endl;
     //    std::cout << "    -iupac: if 1, will output 1 sequence per individual using IUPAC codes, and lower-case bases denoting haplotype calls (def: 0, output 2 lines per individual)" << std::endl;
 //    std::cout << "    -bed: output regions in bed file only (def: none)" << std::endl;

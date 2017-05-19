@@ -1,6 +1,0 @@
-#!/bin/sh
-echo "Running test A001.07 - With chivalue 2.0, error: 0.1, and minreads 2"
-echo "- original arguments \"-minreads 2 -chivalue 2.0 -error 0.1\""
-echo "- new arguments \"--minreads=2 --chivalue=2.0 --error=0.1\""
-scripts/test_runner "./data/head100.mpileup|-minreads 2 -chivalue 2.0 -error 0.1|--minreads=2 --chivalue=2.0 --error=0.1"
-exit $?

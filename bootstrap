@@ -4,8 +4,7 @@
 
 # This generates a file aclocal.m4 that contains macros for automake things, e.g. AM_INIT_AUTOMAKE.
 aclocal -I m4/ --force
-# libtoolize --force --ltdl --copy
-# libtoolize --copy
+#libtoolize --force --ltdl --copy
 # Check headers and creat config.h.in
 autoheader -f
 
