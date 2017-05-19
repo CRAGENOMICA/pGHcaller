@@ -1,6 +1,0 @@
-#!/bin/sh
-echo "Running test A002.02 - Test different chunk sizes: 100MB"
-echo "- original arguments \"\""
-echo "- new arguments \"-v -s 100\""
-scripts/test_runner "./data/test.5inds.8X.mpileup||-v -s 100"
-exit $?

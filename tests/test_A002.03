@@ -1,6 +1,0 @@
-#!/bin/sh
-echo "Running test A002.03 - Set names to output sequences"
-echo "- original arguments \"-names i1,i2,i3,i4,i5\""
-echo "- new arguments \"--names=i1,i2,i3,i4,i5\""
-scripts/test_runner "./data/test.5inds.8X.mpileup|-names i1,i2,i3,i4,i5|--names=i1,i2,i3,i4,i5"
-exit $?
